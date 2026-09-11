@@ -1,0 +1,20 @@
+# Docker Compose Konfiguration fuer das interne Webportal
+# Projekt: Docker Service Betrieb mit Bash und Python (Nordstern Services GmbH)
+#
+# Vorgaben laut Aufgabenstellung:
+# - fertiges Image nginx:alpine (kein eigenes Image, kein Dockerfile)
+# - Containername nordstern-webportal
+# - Port 8090 (Host) -> 80 (Container)
+# - Volume webportal/ -> /usr/share/nginx/html, read-only
+# - Restart Policy unless-stopped
+# - Kein eigenes Docker-Netzwerk erforderlich
+
+services:
+  webportal:
+    image: nginx:alpine
+    container_name: nordstern-webportal
+    ports:
+      - "8090:80"
+    volumes:
+      - ./webportal:/usr/share/nginx/html:ro
+    restart: unless-stopped
