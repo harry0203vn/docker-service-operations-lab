@@ -82,7 +82,7 @@ Docker + Docker Compose sowie eine Bash-fähige Shell (Linux, macOS oder Windows
 ## Schnellstart
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/harry0203vn/docker-service-operations-lab.git
 cd docker-service-operations-lab
 chmod +x scripts/service_control.sh scripts/health_check.sh
 
