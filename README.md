@@ -1,56 +1,56 @@
 # 🐳 Docker Service Operations Lab
 
-A small, focused Docker Compose lab that demonstrates operating a containerized service end-to-end: starting/stopping it, checking its health, logging results, and generating an automated operational report.
+Ein kompaktes Docker-Compose-Laborprojekt, das den Betrieb eines containerisierten Dienstes von Anfang bis Ende zeigt: starten/stoppen, Zustand prüfen, Ergebnisse protokollieren und daraus automatisch einen Betriebsreport erzeugen.
 
 ## Status
 
-✅ Completed lab project — all three test cases below were executed against a real Docker environment (Docker Desktop + WSL Ubuntu) and passed.
+✅ Abgeschlossenes Laborprojekt — alle drei unten beschriebenen Testfälle wurden gegen eine echte Docker-Umgebung (Docker Desktop mit WSL Ubuntu) ausgeführt und sind erfolgreich verlaufen.
 
-> **Lab / training disclaimer:** This repository is a curated portfolio version of a completed training project ("Modul 2 — Docker Service Betrieb") built during an IT system administration course. It is a lab exercise, not production software, and is not affiliated with or certified by any certification body.
+> **Hinweis:** Dieses Repository ist die kuratierte Portfolio-Version eines abgeschlossenen Lernprojekts ("Modul 2 — Docker Service Betrieb") aus einer Weiterbildung zum IT-Systemadministrator. Es handelt sich um ein Laborprojekt, nicht um produktive Software, und es besteht keine Verbindung zu oder Zertifizierung durch eine Prüfungsstelle.
 
-## Skills Demonstrated
+## Gezeigte Kenntnisse
 
-- Defining and running a service with **Docker Compose** using an official base image (no custom `Dockerfile`)
-- Writing a **Bash** control script for service lifecycle management (start/stop/status/logs)
-- Writing a **Bash** health-check script with HTTP status checking, timestamped logging, and proper exit codes
-- Writing a **Python** script that parses log data and generates a human-readable operational report
-- Designing and executing real functional test cases against a running container, including a deliberate failure scenario
-- Writing clear operational documentation for a service another engineer could run
+- Definieren und Betreiben eines Dienstes mit **Docker Compose** auf Basis eines offiziellen Images (kein eigenes `Dockerfile`)
+- Schreiben eines **Bash**-Skripts zur Dienststeuerung (Start/Stop/Status/Logs)
+- Schreiben eines **Bash**-Health-Check-Skripts mit HTTP-Statusprüfung, Zeitstempel-Logging und sauberen Exit-Codes
+- Schreiben eines **Python**-Skripts, das Logdaten auswertet und einen lesbaren Betriebsreport erzeugt
+- Entwurf und Durchführung realer funktionaler Testfälle gegen einen laufenden Container, inklusive eines gezielten Fehlerszenarios
+- Schreiben verständlicher Betriebsdokumentation für einen Dienst, den auch eine andere Person bedienen kann
 
-## Architecture
+## Architektur
 
 ```
 ┌─────────────────────────────┐
-│   Docker host (localhost)   │
+│   Docker-Host (localhost)   │
 │                              │
 │  scripts/service_control.sh ─┐
 │  scripts/health_check.sh    ─┼─> nordstern-webportal (nginx:alpine)
-│                              │        │  port 8090 -> 80
+│                              │        │  Port 8090 -> 80
 │  scripts/report_generator.py│        │  ./webportal -> /usr/share/nginx/html (read-only)
-│         reads               │
+│         liest                │
 │  logs/healthcheck.log       │
-│         writes              │
+│         schreibt             │
 │  reports/betriebsreport.txt │
 └─────────────────────────────┘
 ```
 
-See [`docs/architecture.md`](docs/architecture.md) for details.
+Details siehe [`docs/architecture.md`](docs/architecture.md).
 
-## Technology Stack
+## Verwendete Technologien
 
-| Layer | Technology |
+| Ebene | Technologie |
 |---|---|
-| Container runtime | Docker / Docker Compose |
-| Base image | `nginx:alpine` (Docker Official Image) |
-| Service operations | Bash |
+| Container-Laufzeitumgebung | Docker / Docker Compose |
+| Basis-Image | `nginx:alpine` (offizielles Docker-Image) |
+| Dienststeuerung | Bash |
 | Reporting | Python 3 |
-| Web content | Static HTML/CSS |
+| Web-Inhalt | Statisches HTML/CSS |
 
-## Service Overview
+## Dienstübersicht
 
-A single Nginx container (`nordstern-webportal`) serves a small static internal-portal page. The surrounding scripts handle starting/stopping it, checking that it's actually reachable, and turning the health-check history into a short report.
+Ein einzelner Nginx-Container (`nordstern-webportal`) liefert eine kleine statische Portalseite aus. Die begleitenden Skripte übernehmen das Starten/Stoppen, die Erreichbarkeitsprüfung und die Auswertung der Health-Check-Historie zu einem Report.
 
-## Repository Structure
+## Projektstruktur
 
 ```
 docker-service-operations-lab/
@@ -75,7 +75,11 @@ docker-service-operations-lab/
     └── screenshots/
 ```
 
-## Quick Start
+## Voraussetzungen
+
+Docker + Docker Compose sowie eine Bash-fähige Shell (Linux, macOS oder Windows über WSL). Python 3 wird nur für das Report-Skript benötigt.
+
+## Schnellstart
 
 ```bash
 git clone <this-repo-url>
@@ -88,54 +92,54 @@ python3 scripts/report_generator.py
 cat reports/betriebsreport.txt
 ```
 
-The portal is then reachable at **http://localhost:8090**.
+Das Portal ist danach unter **http://localhost:8090** erreichbar.
 
-Requirements: Docker + Docker Compose, and a Bash-capable shell (Linux, macOS, or Windows via WSL). Python 3 is needed only for the report script.
+## Dienststeuerung
 
-## Service Operations
+`scripts/service_control.sh` kapselt Docker Compose mit vier Befehlen: `start`, `stop`, `status`, `logs`. Details siehe [`docs/operations.md`](docs/operations.md).
 
-`scripts/service_control.sh` wraps Docker Compose with four commands: `start`, `stop`, `status`, `logs`. See [`docs/operations.md`](docs/operations.md).
+## Health Check
 
-## Health Checks
+`scripts/health_check.sh` prüft `http://localhost:8090` und hängt eine Zeile mit Zeitstempel und Status (`OK`/`FEHLER`) an `logs/healthcheck.log` an. Exit-Code `0` bei Erfolg, `1` bei Fehler. Details siehe [`docs/health-checks-and-logging.md`](docs/health-checks-and-logging.md).
 
-`scripts/health_check.sh` checks `http://localhost:8090` and appends a timestamped `OK`/`FEHLER` line to `logs/healthcheck.log`, exiting `0` on success and `1` on failure. See [`docs/health-checks-and-logging.md`](docs/health-checks-and-logging.md).
+## Report-Erstellung
 
-## Report Generation
+`scripts/report_generator.py` liest `logs/healthcheck.log` und schreibt `reports/betriebsreport.txt` mit Anzahl erfolgreicher/fehlgeschlagener Healthchecks, letztem bekanntem Status und einer kurzen Empfehlung. Details siehe [`docs/health-checks-and-logging.md`](docs/health-checks-and-logging.md).
 
-`scripts/report_generator.py` reads `logs/healthcheck.log` and writes `reports/betriebsreport.txt` with a success/failure count, the last known status, and a short recommendation. See [`docs/health-checks-and-logging.md`](docs/health-checks-and-logging.md).
+## Testfälle
 
-## Testing
+Drei reale Testfälle wurden gegen eine laufende Docker-Umgebung ausgeführt: Normalbetrieb, ein gestoppter Dienst als Fehlerfall, und die End-to-End-Reporterstellung. Details siehe [`docs/testing.md`](docs/testing.md).
 
-Three real test cases were executed against a live Docker environment: normal operation, a stopped-service failure case, and end-to-end report generation. See [`docs/testing.md`](docs/testing.md).
+## Nachweise
 
-## Evidence
+Ausgewählte, auf Privatsphäre geprüfte Screenshots der echten Testläufe liegen unter [`evidence/`](evidence/README.md).
 
-Selected, privacy-reviewed screenshots from the real test runs live in [`evidence/`](evidence/README.md).
+## Fehlerbehebung / Erkenntnisse
 
-## Troubleshooting / Lessons Learned
+Siehe [`docs/troubleshooting.md`](docs/troubleshooting.md) für reale Probleme, die beim Aufbau aufgetreten sind (z. B. fehlende Original-Webdateien), und wie sie gelöst wurden.
 
-See [`docs/troubleshooting.md`](docs/troubleshooting.md) for real issues encountered during the build (e.g. missing original web assets) and how they were resolved.
+## Sicherheitsaspekte
 
-## Security Considerations
+- Es werden im gesamten Projekt keine Secrets, Zugangsdaten oder `.env`-Dateien verwendet.
+- Der Nginx-Container bindet `webportal/` **read-only** ein — der Container kann die Quelldateien nicht verändern.
+- Kein Privileged Mode, kein Docker-Socket-Mount, kein `cap_add`, keine benutzerdefinierte Registry.
+- Der Web-Inhalt ist ein selbst erstellter Platzhalter für ein fiktives Unternehmen und enthält keine echten personenbezogenen oder organisatorischen Daten.
 
-- No secrets, credentials, or `.env` files are used anywhere in this project.
-- The Nginx container mounts `webportal/` as a **read-only** bind mount — the container cannot modify the source files.
-- No privileged mode, no Docker socket mount, no `cap_add`, no custom registry.
-- The web content is a self-made placeholder for a fictional company; it contains no real personal or organizational data.
+## Einschränkungen
 
-## Limitations
+Dies ist ein kompaktes Laborprojekt, kein Produktivsystem:
 
-This is a compact lab project, not a production system:
+- Ein einzelner Dienst, kein Reverse Proxy, kein TLS.
+- Kein eigenes Docker-Netzwerk über das Compose-Standardnetzwerk hinaus.
+- Health Checks und Reports werden manuell ausgeführt, nicht zeitgesteuert (ein Cronjob wäre ein naheliegender nächster Schritt).
+- Keine Anbindung an Monitoring/Alerting (z. B. Prometheus/Grafana) — der Report ist eine einfache Textdatei.
 
-- Single service, no reverse proxy, no TLS.
-- No custom Docker network beyond Compose's default.
-- Health checks and reports are run manually, not on a schedule (a cron job would be the natural next step).
-- No alerting/monitoring integration (e.g. Prometheus/Grafana) is included — the report is a plain text file.
+**Mögliche Erweiterung:** zeitgesteuerte Ausführung von Health Check und Report per Cron, sowie eine einfache Benachrichtigung bei `FEHLER`-Status.
 
-## Project Origin
+## Projektkontext
 
-This repository is a curated portfolio version of a completed IT training project ("Modul 2 — Docker Service Betrieb") built as part of an IT system administration course. The original submission also included a written report, a short presentation, and screenshot evidence; this repository focuses on the reusable technical artifacts.
+Dieses Repository ist die kuratierte Portfolio-Version eines abgeschlossenen IT-Weiterbildungsprojekts ("Modul 2 — Docker Service Betrieb") im Rahmen einer Ausbildung zum IT-Systemadministrator. Die ursprüngliche Abgabe umfasste zusätzlich einen schriftlichen Bericht, eine kurze Präsentation und Screenshot-Nachweise; dieses Repository konzentriert sich auf die wiederverwendbaren technischen Artefakte.
 
-## Author
+## Autor
 
 **Harry** — [@harry0203vn](https://github.com/harry0203vn)

@@ -1,58 +1,58 @@
-# Testing
+# Tests
 
-Three real test cases were executed against a live Docker environment (Docker Desktop with WSL Ubuntu integration). All three produced the log and report data shown in [`health-checks-and-logging.md`](health-checks-and-logging.md).
+Drei reale Testfälle wurden gegen eine laufende Docker-Umgebung ausgeführt (Docker Desktop mit WSL-Ubuntu-Integration). Alle drei erzeugten die Log- und Reportdaten, die in [`health-checks-and-logging.md`](health-checks-and-logging.md) gezeigt werden.
 
-## Test Case 1 — Normal operation
+## Testfall 1 — Normalbetrieb
 
-**Objective:** Verify that the service starts correctly and the health check reports success while it is running.
+**Ziel:** Prüfen, dass der Dienst korrekt startet und der Health Check bei laufendem Dienst Erfolg meldet.
 
-**Procedure:**
+**Ablauf:**
 1. `./scripts/service_control.sh start`
-2. Confirm in a browser that the portal loads at `http://localhost:8090`.
+2. Im Browser bestätigen, dass das Portal unter `http://localhost:8090` lädt.
 3. `./scripts/health_check.sh`
 
-**Expected result:** The portal is reachable, the script prints a success message, exits with code `0`, and appends an `OK` line to `logs/healthcheck.log`.
+**Erwartetes Ergebnis:** Das Portal ist erreichbar, das Skript gibt eine Erfolgsmeldung aus, beendet sich mit Exit-Code `0` und hängt eine `OK`-Zeile an `logs/healthcheck.log` an.
 
-**Observed result:** ✅ Passed. The portal loaded correctly, and `logs/healthcheck.log` received the entry `2026-09-09 09:59:02 OK`.
+**Beobachtetes Ergebnis:** ✅ Bestanden. Das Portal lud korrekt, und `logs/healthcheck.log` erhielt den Eintrag `2026-09-09 09:59:02 OK`.
 
-**Evidence:** `evidence/screenshots/` (browser screenshot of the running portal; see [`evidence/README.md`](../evidence/README.md) for exactly which screenshots are included in this repository and why).
+**Nachweis:** `evidence/screenshots/` (Browser-Screenshot des laufenden Portals; siehe [`evidence/README.md`](../evidence/README.md) für die genaue Auswahl der in diesem Repository enthaltenen Screenshots und die Gründe dafür).
 
-## Test Case 2 — Stopped service (failure case)
+## Testfall 2 — Gestoppter Dienst (Fehlerfall)
 
-**Objective:** Verify that the health check correctly detects and logs a failure when the service is not running, and returns a non-zero exit code, instead of silently succeeding or crashing.
+**Ziel:** Prüfen, dass der Health Check korrekt erkennt und protokolliert, wenn der Dienst nicht läuft, und einen von Null verschiedenen Exit-Code liefert, statt stillschweigend erfolgreich zu sein oder abzustürzen.
 
-**Procedure:**
+**Ablauf:**
 1. `./scripts/service_control.sh stop`
 2. `./scripts/health_check.sh`
 
-**Expected result:** curl cannot reach `http://localhost:8090`; the script prints a failure message, exits with code `1`, and appends a `FEHLER` line to `logs/healthcheck.log`.
+**Erwartetes Ergebnis:** curl kann `http://localhost:8090` nicht erreichen; das Skript gibt eine Fehlermeldung aus, beendet sich mit Exit-Code `1` und hängt eine `FEHLER`-Zeile an `logs/healthcheck.log` an.
 
-**Observed result:** ✅ Passed. With the container stopped, the health check correctly logged `2026-09-09 10:01:57 FEHLER` and returned exit code `1` instead of raising an unhandled error — this specifically validates the decision not to use `set -e` in `health_check.sh`, since a failed `curl` call here is an expected condition that must still be logged, not an abort condition.
+**Beobachtetes Ergebnis:** ✅ Bestanden. Bei gestopptem Container protokollierte der Health Check korrekt `2026-09-09 10:01:57 FEHLER` und lieferte Exit-Code `1`, statt einen unbehandelten Fehler auszulösen — dies bestätigt konkret die Entscheidung, in `health_check.sh` kein `set -e` zu verwenden, da ein fehlgeschlagener `curl`-Aufruf hier ein erwarteter Zustand ist, der trotzdem protokolliert werden muss, kein Abbruchgrund.
 
-**Evidence:** Terminal output of the failed health check (see [`evidence/README.md`](../evidence/README.md) for which terminal screenshots could be safely included).
+**Nachweis:** Terminalausgabe des fehlgeschlagenen Health Checks (siehe [`evidence/README.md`](../evidence/README.md) dazu, welche Terminal-Screenshots sicher aufgenommen werden konnten).
 
-## Test Case 3 — Operational report generation
+## Testfall 3 — Erstellung des Betriebsreports
 
-**Objective:** Verify that `report_generator.py` correctly aggregates a mixed history of `OK` and `FEHLER` entries into an accurate, human-readable report.
+**Ziel:** Prüfen, dass `report_generator.py` eine gemischte Historie aus `OK`- und `FEHLER`-Einträgen korrekt zu einem verständlichen Report zusammenfasst.
 
-**Procedure:**
-1. `./scripts/service_control.sh start` (bring the service back up after Test Case 2)
-2. `./scripts/health_check.sh` (record a fresh `OK` entry)
+**Ablauf:**
+1. `./scripts/service_control.sh start` (Dienst nach Testfall 2 wieder hochfahren)
+2. `./scripts/health_check.sh` (neuen `OK`-Eintrag aufzeichnen)
 3. `python3 scripts/report_generator.py`
 4. `cat reports/betriebsreport.txt`
 
-**Expected result:** The report correctly counts 2 `OK` entries and 1 `FEHLER` entry from the accumulated log, identifies `OK` as the last known status, and — because there was an earlier failure despite the current success — recommends checking the history rather than simply reporting "stable".
+**Erwartetes Ergebnis:** Der Report zählt korrekt 2 `OK`-Einträge und 1 `FEHLER`-Eintrag aus dem angesammelten Log, erkennt `OK` als letzten bekannten Status und empfiehlt — wegen des früheren Fehlers trotz aktuellem Erfolg — den Verlauf zu prüfen, statt einfach "stabil" zu melden.
 
-**Observed result:** ✅ Passed. The service was restarted and reachable again (`2026-09-09 10:03:15 OK`), and the generated report exactly matched the expected counts and recommendation (see the real report content in [`health-checks-and-logging.md`](health-checks-and-logging.md)).
+**Beobachtetes Ergebnis:** ✅ Bestanden. Der Dienst wurde neu gestartet und war wieder erreichbar (`2026-09-09 10:03:15 OK`), und der erzeugte Report entsprach exakt den erwarteten Zahlen und der erwarteten Empfehlung (siehe den echten Reportinhalt in [`health-checks-and-logging.md`](health-checks-and-logging.md)).
 
-**Evidence:** Terminal output of the report generation and the resulting `betriebsreport.txt` content (see [`evidence/README.md`](../evidence/README.md)).
+**Nachweis:** Terminalausgabe der Reporterstellung und der resultierende Inhalt von `betriebsreport.txt` (siehe [`evidence/README.md`](../evidence/README.md)).
 
-## Summary
+## Zusammenfassung
 
-| # | Test case | Result |
+| # | Testfall | Ergebnis |
 |---|---|---|
-| 1 | Normal operation | ✅ Passed |
-| 2 | Stopped service / failure detection | ✅ Passed |
-| 3 | Report generation | ✅ Passed |
+| 1 | Normalbetrieb | ✅ Bestanden |
+| 2 | Gestoppter Dienst / Fehlererkennung | ✅ Bestanden |
+| 3 | Reporterstellung | ✅ Bestanden |
 
-All three test cases were run against the real `docker-compose.yml` in this repository, with no modifications to the scripts between the original test run and this repository's content.
+Alle drei Testfälle wurden gegen die in diesem Repository enthaltene `docker-compose.yml` ausgeführt, ohne dass die Skripte zwischen dem ursprünglichen Testlauf und dem Inhalt dieses Repositorys verändert wurden.

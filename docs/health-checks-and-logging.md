@@ -1,24 +1,24 @@
-# Health Checks and Logging
+# Health Checks und Logging
 
 ## `scripts/health_check.sh`
 
-Checks whether the portal is reachable at `http://localhost:8090` and records the result.
+Prüft, ob das Portal unter `http://localhost:8090` erreichbar ist, und protokolliert das Ergebnis.
 
-Logic:
+Ablauf:
 
-1. Sends an HTTP request with `curl -fsS -o /dev/null -w "%{http_code}" --max-time 5 http://localhost:8090`.
-2. If curl succeeds **and** the returned HTTP status code is exactly `200`, the check counts as success.
-3. Otherwise (connection refused, timeout after 5 seconds, or any non-200 status) the check counts as failure.
-4. Either way, a timestamped line is appended to `logs/healthcheck.log`:
-   - `YYYY-MM-DD HH:MM:SS OK` on success
-   - `YYYY-MM-DD HH:MM:SS FEHLER` on failure
-5. The script also prints a short human-readable message to the terminal and exits with `0` on success or `1` on failure, so it can be used in automation (e.g. a cron job or CI step) that reacts to the exit code.
+1. Sendet eine HTTP-Anfrage mit `curl -fsS -o /dev/null -w "%{http_code}" --max-time 5 http://localhost:8090`.
+2. Gelingt curl **und** liefert die Antwort exakt den HTTP-Status `200`, gilt der Check als erfolgreich.
+3. Andernfalls (Verbindung abgelehnt, Timeout nach 5 Sekunden oder ein anderer Statuscode) gilt der Check als fehlgeschlagen.
+4. In beiden Fällen wird eine Zeile mit Zeitstempel an `logs/healthcheck.log` angehängt:
+   - `YYYY-MM-DD HH:MM:SS OK` bei Erfolg
+   - `YYYY-MM-DD HH:MM:SS FEHLER` bei Fehler
+5. Zusätzlich gibt das Skript eine kurze, verständliche Meldung im Terminal aus und beendet sich mit Exit-Code `0` (Erfolg) bzw. `1` (Fehler), sodass es in Automatisierung (z. B. einem Cronjob oder CI-Schritt) verwendet werden kann, die auf den Exit-Code reagiert.
 
-The script deliberately does **not** use `set -e`, because a failed `curl` call (service unreachable) is an expected, handled outcome here — not a script bug — and must not abort the script before the log line is written.
+Das Skript verwendet bewusst **kein** `set -e`, da ein fehlgeschlagener `curl`-Aufruf (Dienst nicht erreichbar) hier ein erwartetes, kontrolliert zu behandelndes Ergebnis ist — kein Skriptfehler, der zum Abbruch führen sollte, bevor die Logzeile geschrieben wurde.
 
-### Real log example
+### Reales Log-Beispiel
 
-An actual run of the project produced the following `logs/healthcheck.log` (Testfall 1 → Testfall 2 → Testfall 3, see [`testing.md`](testing.md)):
+Ein echter Testlauf des Projekts erzeugte folgendes `logs/healthcheck.log` (Testfall 1 → Testfall 2 → Testfall 3, siehe [`testing.md`](testing.md)):
 
 ```
 2026-09-09 09:59:02 OK
@@ -26,27 +26,27 @@ An actual run of the project produced the following `logs/healthcheck.log` (Test
 2026-09-09 10:03:15 OK
 ```
 
-This shows the service was reachable, then briefly stopped (correctly logged as `FEHLER`), then reachable again after being restarted.
+Das zeigt: Der Dienst war erreichbar, wurde dann kurz gestoppt (korrekt als `FEHLER` protokolliert) und war nach dem Neustart wieder erreichbar.
 
 ## `scripts/report_generator.py`
 
-Reads `logs/healthcheck.log` line by line and produces `reports/betriebsreport.txt`.
+Liest `logs/healthcheck.log` zeilenweise ein und erzeugt daraus `reports/betriebsreport.txt`.
 
-Logic:
+Ablauf:
 
-1. If the log file does not exist yet, the script prints a helpful hint ("run `health_check.sh` at least once first") and exits with `1` instead of crashing.
-2. Each non-empty line is classified by its trailing word: lines ending in `OK` increment an OK counter, lines ending in `FEHLER` increment an error counter, and unrecognized lines are simply skipped so a single malformed line cannot crash the report.
-3. The **last** classified line determines the "last known status".
-4. A short recommendation is derived from the last status and the error count:
-   - No usable entries at all → *"No evaluable entries present — check the health check."*
-   - Last status `OK` and zero errors ever → *"Service is running stably."*
-   - Last status `OK` but at least one earlier `FEHLER` → *"Service is currently running, but there were earlier failures — check the history."*
-   - Last status `FEHLER` → *"Check the service."*
-5. The result is written to `reports/betriebsreport.txt`.
+1. Existiert die Logdatei noch nicht, gibt das Skript einen hilfreichen Hinweis aus ("zuerst `health_check.sh` mindestens einmal ausführen") und beendet sich mit Exit-Code `1`, statt abzustürzen.
+2. Jede nicht-leere Zeile wird anhand ihres letzten Worts eingeordnet: Zeilen, die auf `OK` enden, erhöhen den OK-Zähler, Zeilen, die auf `FEHLER` enden, den Fehlerzähler; nicht erkannte Zeilen werden einfach übersprungen, damit eine einzelne fehlerhafte Zeile den Report nicht zum Absturz bringt.
+3. Die **letzte** ausgewertete Zeile bestimmt den "letzten bekannten Status".
+4. Aus letztem Status und Fehleranzahl wird eine kurze Empfehlung abgeleitet:
+   - Keine auswertbaren Einträge vorhanden → *"Keine auswertbaren Einträge vorhanden – Healthcheck prüfen."*
+   - Letzter Status `OK` und nie ein Fehler → *"Dienst läuft stabil."*
+   - Letzter Status `OK`, aber mindestens ein früherer `FEHLER` → *"Dienst läuft aktuell, es gab jedoch frühere Fehler – Verlauf prüfen."*
+   - Letzter Status `FEHLER` → *"Dienst prüfen."*
+5. Das Ergebnis wird in `reports/betriebsreport.txt` geschrieben.
 
-### Real report example
+### Reales Report-Beispiel
 
-Generated from the log example above:
+Erzeugt aus dem obigen Log-Beispiel:
 
 ```
 Projekt: Nordstern Webportal (Projekt 5 - Docker Service Betrieb)
@@ -59,4 +59,4 @@ Letzter bekannter Status: OK
 Empfehlung: Dienst laeuft aktuell, es gab jedoch fruehere Fehler - Verlauf pruefen.
 ```
 
-(The report content itself is generated in German, matching the original assignment's language; the counts and recommendation logic are exactly as described above — here "1 earlier failure, last status OK" correctly triggers the "running now, but check history" recommendation.)
+Der Reportinhalt wird vom Skript selbst auf Deutsch erzeugt, passend zur Sprache der ursprünglichen Aufgabenstellung; die oben beschriebene Zähl- und Empfehlungslogik entspricht genau diesem Beispiel — hier führt "1 früherer Fehler, letzter Status OK" korrekt zur Empfehlung "läuft aktuell, aber Verlauf prüfen".

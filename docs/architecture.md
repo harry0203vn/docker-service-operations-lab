@@ -1,8 +1,8 @@
-# Architecture
+# Architektur
 
-## Overview
+## Überblick
 
-The project runs a single containerized service defined entirely through Docker Compose — no custom `Dockerfile` is used, only the official `nginx:alpine` image.
+Das Projekt betreibt einen einzigen containerisierten Dienst, der vollständig über Docker Compose definiert ist — es gibt kein eigenes `Dockerfile`, nur das offizielle Image `nginx:alpine`.
 
 ```yaml
 services:
@@ -16,46 +16,46 @@ services:
     restart: unless-stopped
 ```
 
-## Components
+## Komponenten
 
-| Component | Role |
+| Komponente | Aufgabe |
 |---|---|
-| `docker-compose.yml` | Declares the single `webportal` service, its image, port mapping, volume, and restart policy. |
-| `nordstern-webportal` container | An `nginx:alpine` container serving static files. This is the only container in the project. |
-| `webportal/` | Static site content (`index.html`, `style.css`) for a small fictional company portal, mounted **read-only** into the container. |
-| `scripts/service_control.sh` | Bash wrapper around `docker compose` for starting, stopping, and inspecting the service. |
-| `scripts/health_check.sh` | Bash script that probes the running service over HTTP and logs the result. |
-| `scripts/report_generator.py` | Python script that turns the health-check log into a short operational report. |
-| `logs/healthcheck.log` | Append-only log written by `health_check.sh`. |
-| `reports/betriebsreport.txt` | Generated report written by `report_generator.py`. |
+| `docker-compose.yml` | Definiert den einzigen Dienst `webportal`, sein Image, das Port-Mapping, das Volume und die Restart-Policy. |
+| Container `nordstern-webportal` | Ein `nginx:alpine`-Container, der statische Dateien ausliefert. Es ist der einzige Container im Projekt. |
+| `webportal/` | Statischer Seiteninhalt (`index.html`, `style.css`) für ein kleines Portal eines fiktiven Unternehmens, **read-only** in den Container eingebunden. |
+| `scripts/service_control.sh` | Bash-Wrapper um `docker compose` zum Starten, Stoppen und Prüfen des Dienstes. |
+| `scripts/health_check.sh` | Bash-Skript, das den laufenden Dienst per HTTP prüft und das Ergebnis protokolliert. |
+| `scripts/report_generator.py` | Python-Skript, das aus dem Health-Check-Log einen kurzen Betriebsreport erzeugt. |
+| `logs/healthcheck.log` | Append-only-Log, geschrieben von `health_check.sh`. |
+| `reports/betriebsreport.txt` | Erzeugter Report, geschrieben von `report_generator.py`. |
 
-## Data / control flow
+## Daten-/Kontrollfluss
 
 ```
 service_control.sh start
         │
         ▼
 docker compose up -d  ──►  nordstern-webportal (nginx:alpine)
-                                   │  listens on container port 80
-                                   │  serves ./webportal (read-only)
+                                   │  lauscht auf Container-Port 80
+                                   │  liefert ./webportal aus (read-only)
                                    ▼
-                         http://localhost:8090  (host port 8090 -> container port 80)
+                         http://localhost:8090  (Host-Port 8090 -> Container-Port 80)
 
 health_check.sh  ──HTTP GET──►  http://localhost:8090
         │
         ▼
-appends "<timestamp> OK" or "<timestamp> FEHLER" to logs/healthcheck.log
+hängt "<Zeitstempel> OK" oder "<Zeitstempel> FEHLER" an logs/healthcheck.log an
 
-report_generator.py  ──reads──►  logs/healthcheck.log
+report_generator.py  ──liest──►  logs/healthcheck.log
         │
         ▼
-writes reports/betriebsreport.txt (OK/FEHLER counts, last status, recommendation)
+schreibt reports/betriebsreport.txt (Anzahl OK/FEHLER, letzter Status, Empfehlung)
 ```
 
-## Design decisions
+## Designentscheidungen
 
-- **Official image only, no custom `Dockerfile`.** The service only needs to serve static files, so `nginx:alpine` is used directly. This keeps the image small and avoids maintaining a custom build.
-- **Read-only bind mount.** `./webportal:/usr/share/nginx/html:ro` mounts the site content read-only, so the running container cannot modify the source files on the host.
-- **`restart: unless-stopped`.** The container restarts automatically after a host reboot or Docker restart, but stays stopped if it was deliberately stopped via `service_control.sh stop`.
-- **No custom Docker network.** With a single service, Compose's default network is sufficient; no service-to-service communication is required.
-- **Separation of concerns.** Compose owns the container lifecycle, `service_control.sh` is the human-facing operational entry point, `health_check.sh` handles monitoring, and `report_generator.py` handles reporting — each script has one job.
+- **Nur offizielles Image, kein eigenes `Dockerfile`.** Der Dienst muss lediglich statische Dateien ausliefern, daher wird `nginx:alpine` direkt verwendet. Das hält das Image klein und erspart die Pflege eines eigenen Builds.
+- **Read-only Bind-Mount.** `./webportal:/usr/share/nginx/html:ro` bindet den Seiteninhalt read-only ein, sodass der laufende Container die Quelldateien auf dem Host nicht verändern kann.
+- **`restart: unless-stopped`.** Der Container startet nach einem Host-Neustart oder Docker-Neustart automatisch neu, bleibt aber gestoppt, wenn er zuvor bewusst über `service_control.sh stop` beendet wurde.
+- **Kein eigenes Docker-Netzwerk.** Bei nur einem Dienst genügt das Standardnetzwerk von Compose; eine Kommunikation zwischen mehreren Diensten ist nicht erforderlich.
+- **Trennung der Zuständigkeiten.** Compose übernimmt den Container-Lebenszyklus, `service_control.sh` ist der bedienerfreundliche Einstiegspunkt für den Betrieb, `health_check.sh` übernimmt die Überwachung und `report_generator.py` das Reporting — jedes Skript hat genau eine Aufgabe.

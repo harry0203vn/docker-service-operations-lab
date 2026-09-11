@@ -1,21 +1,21 @@
-# Operations
+# Betrieb
 
-`scripts/service_control.sh` is a thin, safe wrapper around `docker compose` for the `nordstern-webportal` service. It always resolves the project directory relative to its own location, so it works no matter which directory it is invoked from.
+`scripts/service_control.sh` ist ein schlanker, sicherer Wrapper um `docker compose` für den Dienst `nordstern-webportal`. Das Skript ermittelt sein Projektverzeichnis immer relativ zu seinem eigenen Speicherort, sodass es unabhängig vom aktuellen Arbeitsverzeichnis funktioniert.
 
-## Commands
+## Befehle
 
 ```
 ./scripts/service_control.sh {start|stop|status|logs}
 ```
 
-| Command | What it does | Underlying Compose call |
+| Befehl | Wirkung | Zugrunde liegender Compose-Aufruf |
 |---|---|---|
-| `start` | Starts the service in the background. | `docker compose -f docker-compose.yml up -d` |
-| `stop` | Stops and removes the service's container. | `docker compose -f docker-compose.yml down` |
-| `status` | Shows whether the container is currently running. | `docker compose -f docker-compose.yml ps` |
-| `logs` | Prints the last 50 lines of the container's logs. | `docker compose -f docker-compose.yml logs --tail=50` |
+| `start` | Startet den Dienst im Hintergrund. | `docker compose -f docker-compose.yml up -d` |
+| `stop` | Stoppt den Dienst und entfernt den Container. | `docker compose -f docker-compose.yml down` |
+| `status` | Zeigt, ob der Container aktuell läuft. | `docker compose -f docker-compose.yml ps` |
+| `logs` | Gibt die letzten 50 Zeilen der Container-Logs aus. | `docker compose -f docker-compose.yml logs --tail=50` |
 
-Running the script with no argument, or an unrecognized one, prints a usage message and exits with status `1`; it never starts or stops anything in that case.
+Wird das Skript ohne Argument oder mit einem unbekannten Argument aufgerufen, gibt es einen Hinweis zur Verwendung aus und beendet sich mit Exit-Code `1`, ohne etwas zu starten oder zu stoppen.
 
 ## Start
 
@@ -23,7 +23,7 @@ Running the script with no argument, or an unrecognized one, prints a usage mess
 ./scripts/service_control.sh start
 ```
 
-Starts the `nordstern-webportal` container via Docker Compose. Once running, the portal is reachable at **http://localhost:8090**.
+Startet den Container `nordstern-webportal` über Docker Compose. Danach ist das Portal unter **http://localhost:8090** erreichbar.
 
 ## Stop
 
@@ -31,7 +31,7 @@ Starts the `nordstern-webportal` container via Docker Compose. Once running, the
 ./scripts/service_control.sh stop
 ```
 
-Stops and removes the container (`docker compose down`). The static content in `webportal/` is untouched, since it lives on the host and is only mounted read-only.
+Stoppt den Container und entfernt ihn (`docker compose down`). Die statischen Dateien in `webportal/` bleiben unberührt, da sie auf dem Host liegen und nur read-only eingebunden sind.
 
 ## Status
 
@@ -39,7 +39,7 @@ Stops and removes the container (`docker compose down`). The static content in `
 ./scripts/service_control.sh status
 ```
 
-Shows the current container status (running / stopped) via `docker compose ps`.
+Zeigt den aktuellen Containerstatus (läuft / gestoppt) über `docker compose ps` an.
 
 ## Logs
 
@@ -47,8 +47,8 @@ Shows the current container status (running / stopped) via `docker compose ps`.
 ./scripts/service_control.sh logs
 ```
 
-Shows the last 50 lines of the container's own logs (Nginx access/error output), useful when the health check reports a failure and the actual cause needs to be investigated inside the container.
+Zeigt die letzten 50 Zeilen der eigenen Logs des Containers (Nginx-Zugriffs-/Fehlerausgabe) — nützlich, wenn der Health Check einen Fehler meldet und die tatsächliche Ursache im Container untersucht werden soll.
 
-## Safety behavior
+## Verhalten bei Fehlern
 
-Before running any Compose command, the script checks that `docker-compose.yml` actually exists at the resolved project path. If it is missing, the script prints a clear error message naming the expected path and exits with status `1` instead of failing with a raw Docker error.
+Bevor ein Compose-Befehl ausgeführt wird, prüft das Skript, ob `docker-compose.yml` am ermittelten Projektpfad tatsächlich existiert. Fehlt die Datei, gibt das Skript eine klare Fehlermeldung mit dem erwarteten Pfad aus und beendet sich mit Exit-Code `1`, statt mit einem rohen Docker-Fehler abzubrechen.

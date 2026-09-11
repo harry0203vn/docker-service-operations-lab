@@ -1,25 +1,25 @@
-# Evidence
+# Nachweise
 
-This folder contains a privacy-reviewed subset of the screenshots captured during the real test runs described in [`../docs/testing.md`](../docs/testing.md).
+Dieser Ordner enthält eine auf Privatsphäre geprüfte Auswahl der Screenshots, die während der echten Testläufe entstanden sind (siehe [`../docs/testing.md`](../docs/testing.md)).
 
-## Included
+## Enthalten
 
-| File | Test case | What it shows |
+| Datei | Testfall | Was zu sehen ist |
 |---|---|---|
-| `screenshots/01-portal-running.png` | Test Case 1 (normal operation) | The portal loaded in a browser at `http://localhost:8090`, confirming the Nginx container serves the expected content. The browser's personal bookmarks bar was cropped out of this image; the portal content itself is shown unmodified and at its original resolution. |
+| `screenshots/01-portal-running.png` | Testfall 1 (Normalbetrieb) | Das im Browser unter `http://localhost:8090` geladene Portal — bestätigt, dass der Nginx-Container den erwarteten Inhalt ausliefert. Die persönliche Browser-Lesezeichenleiste wurde aus diesem Bild herausgeschnitten; der eigentliche Portalinhalt ist unverändert und in Originalauflösung zu sehen. |
 
-## Not included (reviewed, but excluded on purpose)
+## Nicht enthalten (geprüft, aber bewusst ausgeschlossen)
 
-Three additional terminal screenshots were captured during testing (covering Test Cases 1–3: normal operation, the stopped-service failure case, and report generation). Each one was individually reviewed for whether personal information could be safely removed by cropping alone.
+Während der Tests wurden drei weitere Terminal-Screenshots aufgenommen (zu den Testfällen 1–3: Normalbetrieb, Fehlerfall gestoppter Dienst, Reporterstellung). Jeder wurde einzeln daraufhin geprüft, ob personenbezogene Angaben allein durch Zuschneiden sicher entfernt werden können.
 
-In all three, every command line in the terminal begins with a shell prompt in the form `<username>@<hostname>:<personal file path>$`, repeated on essentially every line from the top of the screenshot to the bottom. Because the identifying information is embedded inline within the same lines as the actual command output — not confined to a separate header or footer region — it cannot be removed by cropping without also cutting away the technical evidence the screenshots exist to show.
+Bei allen drei beginnt jede Befehlszeile im Terminal mit einem Shell-Prompt der Form `<Benutzername>@<Hostname>:<persönlicher Dateipfad>$`, das sich über praktisch jede Zeile vom oberen bis zum unteren Bildrand wiederholt. Da die identifizierenden Angaben direkt in denselben Zeilen wie die eigentliche Befehlsausgabe stehen — nicht in einem abgetrennten Kopf- oder Fußbereich — lassen sie sich nicht durch Zuschneiden entfernen, ohne auch den technischen Nachweis zu beschädigen, den die Screenshots eigentlich belegen sollen.
 
-Per this project's evidence policy, terminal text is never edited, retyped, or altered to remove personal information — only straightforward cropping is used, and only when it doesn't compromise the evidence. Since honest cropping wasn't possible for these three images, they were left out of this public repository rather than modified. They remain available in the original (non-public) project workspace for anyone who needs to review the full test evidence, including the personal environment details.
+Gemäß der Nachweis-Richtlinie dieses Projekts wird Terminaltext niemals bearbeitet, neu getippt oder verändert, um persönliche Angaben zu entfernen — es wird ausschließlich einfaches Zuschneiden verwendet, und auch das nur, wenn dadurch der Nachweis nicht beeinträchtigt wird. Da ein ehrliches Zuschneiden bei diesen drei Bildern nicht möglich war, wurden sie aus diesem öffentlichen Repository ausgeschlossen, statt sie zu verändern. Sie bleiben im ursprünglichen (nicht öffentlichen) Projektbereich verfügbar, falls jemand die vollständigen Testnachweise inklusive der persönlichen Umgebungsdetails einsehen möchte.
 
-**It is better to publish fewer clean screenshots than manipulated evidence.**
+**Es ist besser, weniger, aber unverfälschte Screenshots zu veröffentlichen als bearbeitete Nachweise.**
 
-## Screenshot count
+## Anzahl der Screenshots
 
-- Captured during testing: 4
-- Included in this public repository: 1
-- Excluded (personal terminal identity could not be safely cropped out): 3
+- Bei den Tests aufgenommen: 4
+- In diesem öffentlichen Repository enthalten: 1
+- Ausgeschlossen (persönliche Terminal-Identität konnte nicht sicher herausgeschnitten werden): 3
