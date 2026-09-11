@@ -271,16 +271,16 @@ Das Skript führt eine einfache HTTP-GET-Anfrage durch und dokumentiert das Erge
 1. 🔗 Sendet HTTP-GET zu `http://localhost:8090`
 2. ⏱️ Wartet auf Response (mit Timeout)
 3. 📝 Hängt Zeile an `logs/healthcheck.log`:
-   - `2026-09-11 14:23:45 | OK` — Service erreichbar (HTTP 200)
-   - `2026-09-11 14:25:12 | ERROR` — Service nicht erreichbar / Fehler
+   - `2026-09-11 14:23:45 OK` — Service erreichbar (HTTP 200)
+   - `2026-09-11 14:24:02 FEHLER` — Service nicht erreichbar / Fehler
 
-4. 📤 Exit-Code: `0` = OK, `1` = ERROR (für Automation geeignet)
+4. 📤 Exit-Code: `0` = OK, `1` = FEHLER (für Automation geeignet)
 
 **Log-Format:**
 ```
-2026-09-11 14:23:45 | OK
-2026-09-11 14:25:12 | ERROR
-2026-09-11 14:27:30 | OK
+2026-09-11 14:23:45 OK
+2026-09-11 14:24:02 FEHLER
+2026-09-11 14:27:30 OK
 ```
 
 **Siehe:** [docs/health-checks-and-logging.md](docs/health-checks-and-logging.md)
@@ -299,45 +299,26 @@ python3 scripts/report_generator.py
 
 **Was es tut:**
 1. 📖 Liest `logs/healthcheck.log`
-2. 📊 Berechnet Metriken:
-   - Gesamtzahl Checks
-   - Erfolgreiche Checks (%)
-   - Fehlgeschlagene Checks
-   - Letzter bekannter Status
+2. 📊 Zählt die Einträge:
+   - Anzahl `OK`-Einträge
+   - Anzahl `FEHLER`-Einträge
+   - Letzter bekannter Status (aus der letzten Logzeile)
 3. 📝 Schreibt `reports/betriebsreport.txt`
 
 **Report-Beispiel:**
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  DOCKER SERVICE OPERATIONS — BETRIEBSBERICHT
-  Erstellt: 2026-09-11 14:30:15
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Projekt: Nordstern Webportal (Projekt 5 - Docker Service Betrieb)
+Report erzeugt am: 2026-09-11 14:30:15
 
-📊 HEALTH-CHECK-STATISTIK
-──────────────────────────
-  Gesamtchecks:        15
-  Erfolgreich:         14 (93.3%)
-  Fehler:              1  (6.7%)
-  Letzter Status:      OK ✓
+Anzahl erfolgreicher Healthchecks (OK): 2
+Anzahl fehlgeschlagener Healthchecks (FEHLER): 1
+Letzter bekannter Status: OK
 
-📈 TREND
-──────────────────────────
-  Letzte Stunde:       OK
-  Heute (Durchschnitt): OK
-  Verfügbarkeit:       93.3%
-
-🔍 EMPFEHLUNG
-──────────────────────────
-  Status: GRÜN
-  Maßnahme: Keine erforderlich.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Report erstellt: 2026-09-11 14:30:15
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Empfehlung: Dienst laeuft aktuell, es gab jedoch fruehere Fehler - Verlauf pruefen.
 ```
 
-**Siehe:** [docs/reporting-and-data-analysis.md](docs/reporting-and-data-analysis.md)
+**Siehe:** [docs/health-checks-and-logging.md](docs/health-checks-and-logging.md)
 
 ---
 
