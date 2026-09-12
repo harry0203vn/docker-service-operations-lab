@@ -56,7 +56,7 @@ Das Projekt wurde **eigenständig im Rahmen einer IT-Weiterbildung** durchgefüh
 | 🎮 **Dienststeuerung** | Bash-Skript mit `start`, `stop`, `status`, `logs` — vereinheitlichte CLI |
 | 🏥 **HTTP-Health-Checks** | Automatische Prüfung mit Exit-Code-Semantik, Zeitstempel-Logging |
 | 📊 **Strukturiertes Logging** | Tägliche Einträge in maschinenlesbarem Format, Aggregation für Reports |
-| 📈 **Python-Reporting** | Datenauswertung (Erfolgsquoten, Trends), lesbare Betriebsberichte |
+| 📈 **Python-Reporting** | Auswertung der Health-Check-Logs (Anzahl OK/FEHLER, letzter Status), lesbare Betriebsberichte |
 | 🧪 **Funktionale Testfälle** | Normalbetrieb, Fehlerszenarien, End-to-End-Validierung |
 | 🔒 **Keine Secrets** | Keine Hardcoded Credentials, `.env`-Dateien oder private Keys |
 | 📸 **Evidence & Nachweise** | Screenshot-Dokumentation echter Testläufe |
@@ -331,7 +331,7 @@ Das Projekt dokumentiert und validiert drei realistische Szenarien gegen eine ec
 | Test | Beschreibung | Validierung |
 |------|-------------|-------------|
 | **T1: Normalbetrieb** | Service startet, Portal lädt, Health Check OK | HTTP 200, Portal-Inhalt, OK-Log-Eintrag |
-| **T2: Fehlerfall** | Service wird gestoppt, Health Check schlägt fehl | HTTP 0 (Fehler), ERROR-Log-Eintrag, Exit-Code 1 |
+| **T2: Fehlerfall** | Service wird gestoppt, Health Check schlägt fehl | HTTP 0 (Fehler), FEHLER-Log-Eintrag, Exit-Code 1 |
 | **T3: End-to-End** | Kompletter Workflow: Start → Check → Report → Stop | Report enthält korrekte Statistiken, alle Artefakte vorhanden |
 
 **Testlauf durchführen (manuell):**
